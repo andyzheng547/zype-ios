@@ -284,19 +284,25 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     
     // if request still being made or autoplay triggered
     if (self.isPlayerRequestPending){
-        BOOL requiresUniversalEntitlement = [self videoRequiresUniversalEntitlement:self.video];
         
+        // Marketplace connect. Signed in but no sub
         if (kNativeSubscriptionEnabled &&
             [self.video.subscription_required intValue] == 1 &&
-            [[ACPurchaseManager sharedInstance] isActiveSubscription] == false) {
+            [ACStatusManager isUserSignedIn] == true &&
+            [[NSUserDefaults standardUserDefaults] valueForKey:kOAuthProperty_Subscription] <= 0){
+
             [self.playerControlsView setAsPause];
             self.isPlayerRequestPending = NO;
             [self.playerControlsView showSelf];
-        } else if (requiresUniversalEntitlement &&
+            
+        // Sub required but not logged in
+        } else if ([self.video.subscription_required intValue] == 1 &&
                    [ACStatusManager isUserSignedIn] == false){
+            
             [self.playerControlsView setAsPause];
             self.isPlayerRequestPending = NO;
             [self.playerControlsView showSelf];
+            
         } else {
             self.isPlayerRequestPending = NO;
             self.avPlayer = nil;
@@ -1108,14 +1114,14 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         [self configureView];
         [self configurePlayerControlsState];
         
-        BOOL requiresUniversalEntitlement = [self videoRequiresUniversalEntitlement:self.video];
-        
+        // Marketplace connect. Signed in but no sub
         if (kNativeSubscriptionEnabled &&
             [self.video.subscription_required intValue] == 1 &&
-            [[ACPurchaseManager sharedInstance] isActiveSubscription] == false) {
-            
+            [ACStatusManager isUserSignedIn] == true &&
+            [[NSUserDefaults standardUserDefaults] valueForKey:kOAuthProperty_Subscription] <= 0){
+
             if ([self isFullScreen]) [self.avPlayerController exitFullscreen];
-            
+
             [self setThumbnailImage];
             self.avPlayerController = nil;
             [self setupPlayer:[NSURL URLWithString:@""]];
@@ -1123,10 +1129,11 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
             
             self.isPlayerRequestPending = YES;
             [self showNsvodRequiredAlert];
-            
-        } else if (requiresUniversalEntitlement &&
+
+        // Sub required but not logged in
+        } else if ([self.video.subscription_required intValue] == 1 &&
                    [ACStatusManager isUserSignedIn] == false){
-            
+
             if ([self isFullScreen]) [self.avPlayerController exitFullscreen];
             
             [self setThumbnailImage];
@@ -1137,6 +1144,7 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
             self.isPlayerRequestPending = YES;
             [self showSignInRequiredAlert];
             
+        // Allow request to go through. If user does not have entitlement, DPT should return error message
         } else {
             [self refreshPlayer];
             self.isPlayerRequestPending = YES;
@@ -1357,22 +1365,23 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
 - (void)playPausePressed:(id)sender {
     [self.playerControlsView playPausePressed:sender];
     
-    BOOL requiresUniversalEntitlement = [self videoRequiresUniversalEntitlement:self.video];
-    
+    // Marketplace connect. Signed in but no sub
     if (kNativeSubscriptionEnabled &&
         [self.video.subscription_required intValue] == 1 &&
-        [[ACPurchaseManager sharedInstance] isActiveSubscription] == false) {
+        [ACStatusManager isUserSignedIn] == true &&
+        [[NSUserDefaults standardUserDefaults] integerForKey:kOAuthProperty_Subscription] <= 0){
 
         [self showNsvodRequiredAlert];
         
-    } else if (requiresUniversalEntitlement &&
+    // Sub required but not logged in
+    } else if ([self.video.subscription_required intValue] == 1 &&
                [ACStatusManager isUserSignedIn] == false){
         [self showSignInRequiredAlert];
         
     } else {
         if ((self.avPlayer.rate != 0) && (self.avPlayer.error == nil)) {
             [self.avPlayer pause];
-        } else {
+        } else if (self.avPlayer.error == nil) {
             [self.avPlayer play];
         }
     }
