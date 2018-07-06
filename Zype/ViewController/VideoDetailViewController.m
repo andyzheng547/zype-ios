@@ -1119,7 +1119,7 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         if (kNativeSubscriptionEnabled &&
             [self.video.subscription_required intValue] == 1 &&
             [ACStatusManager isUserSignedIn] == true &&
-            [[NSUserDefaults standardUserDefaults] valueForKey:kOAuthProperty_Subscription] <= 0){
+            [[NSUserDefaults standardUserDefaults] integerForKey:kOAuthProperty_Subscription] <= 0){
 
             if ([self isFullScreen]) [self.avPlayerController exitFullscreen];
 
