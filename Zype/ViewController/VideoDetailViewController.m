@@ -102,6 +102,7 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
 
 @property (strong, nonatomic) UIAlertView *alertViewSignInRequired;
 @property (strong, nonatomic) UIAlertView *alertViewNsvodRequired;
+@property (strong, nonatomic) UIAlertView *alertViewIntro;
 
 @property (strong, nonatomic) NSLayoutConstraint *left;
 
@@ -1129,6 +1130,20 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
             
             self.isPlayerRequestPending = YES;
             [self showNsvodRequiredAlert];
+            
+        } else if (kNativeSubscriptionEnabled &&
+                   [self.video.subscription_required intValue] == 1 &&
+                   [ACStatusManager isUserSignedIn] == false){
+            
+            if ([self isFullScreen]) [self.avPlayerController exitFullscreen];
+            
+            [self setThumbnailImage];
+            self.avPlayerController = nil;
+            [self setupPlayer:[NSURL URLWithString:@""]];
+            [self setupPlayerBackground];
+            
+            self.isPlayerRequestPending = YES;
+            [self showIntroViewAlert];
 
         // Sub required but not logged in
         } else if ([self.video.subscription_required intValue] == 1 &&
@@ -1372,6 +1387,12 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         [[NSUserDefaults standardUserDefaults] integerForKey:kOAuthProperty_Subscription] <= 0){
 
         [self showNsvodRequiredAlert];
+        
+    } else if (kNativeSubscriptionEnabled &&
+               [self.video.subscription_required intValue] == 1 &&
+               [ACStatusManager isUserSignedIn] == false){
+        
+        [self showIntroViewAlert];
         
     // Sub required but not logged in
     } else if ([self.video.subscription_required intValue] == 1 &&
@@ -1821,6 +1842,21 @@ NSString* machineName() {
     [self.alertViewNsvodRequired show];
 }
 
+// Intro View shows sign up or login
+- (void)showIntroViewAlert {
+    
+    if (!self.alertViewIntro){
+        self.alertViewIntro = [[UIAlertView alloc] initWithTitle:@"Requires Subscription"
+                                                             message:@"You do not have access to this video. Please sign up or login"
+                                                            delegate:self
+                                                       cancelButtonTitle:@"Cancel"
+                                                       otherButtonTitles:@"Continue", nil];
+    }
+    self.alertViewIntro.tag = 995;
+    
+    [self.alertViewIntro show];
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     
     if (self != nil) {
@@ -1858,6 +1894,20 @@ NSString* machineName() {
             // transition to native sub view
             [UIUtil showSubscriptionViewFromViewController:self];
         } else if (alertView.tag == 996 && buttonIndex == 0){
+            [self configurePlayerControlsState];
+            self.isPlayerRequestPending = NO;
+            [self.playerControlsView showSelf];
+        }
+        
+        if (alertView.tag == 995 && buttonIndex == 1){ // intro view - show signup or login
+            
+            if (self.isFullScreen){
+                [self.avPlayerController exitFullscreen];
+            }
+            
+            // transition to native sub view
+            [UIUtil showIntroViewFromViewController:self];
+        } else if (alertView.tag == 995 && buttonIndex == 0){
             [self configurePlayerControlsState];
             self.isPlayerRequestPending = NO;
             [self.playerControlsView showSelf];
