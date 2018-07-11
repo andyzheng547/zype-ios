@@ -941,25 +941,27 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     }
     
     // TODO: figure out if this is needed. was causing player to not respond to touch
-//    [self.avPlayerController.view removeFromSuperview];
-//    if (kCustomizablePlayerControls){
-//        [self.playerControlsView.view removeFromSuperview];
-//    }
-//    [self.adsContainerView removeFromSuperview];
-//
-//    [self.view addSubview:self.avPlayerController.view];
-//    if (kCustomizablePlayerControls){
-//        [self.view addSubview:self.playerControlsView.view];
-//    }
-//    [self.view addSubview:self.adsContainerView];
-//
-//    [self.view bringSubviewToFront:self.imageThumbnail];
-//    [self.view bringSubviewToFront:self.avPlayerController.view];
-//    [self.view bringSubviewToFront:self.adsContainerView];
-//    [self.view bringSubviewToFront:self.activityIndicator];
-//    if (kCustomizablePlayerControls){
-//        [self.view bringSubviewToFront:self.playerControlsView.view];
-//    }
+    if (kCustomizablePlayerControls){
+        [self.avPlayerController.view removeFromSuperview];
+        if (kCustomizablePlayerControls){
+            [self.playerControlsView.view removeFromSuperview];
+        }
+        [self.adsContainerView removeFromSuperview];
+
+        [self.view addSubview:self.avPlayerController.view];
+        if (kCustomizablePlayerControls){
+            [self.view addSubview:self.playerControlsView.view];
+        }
+        [self.view addSubview:self.adsContainerView];
+
+        [self.view bringSubviewToFront:self.imageThumbnail];
+        [self.view bringSubviewToFront:self.avPlayerController.view];
+        [self.view bringSubviewToFront:self.adsContainerView];
+        [self.view bringSubviewToFront:self.activityIndicator];
+        if (kCustomizablePlayerControls){
+            [self.view bringSubviewToFront:self.playerControlsView.view];
+        }
+    }
     
     // AVPlayerController
     if (self.avPlayerController.view != nil && constraintItemView != nil) {
