@@ -39,6 +39,8 @@
 //Enable Gallery layout
 #define kAppAppleTVLayout NO
 
+#define kCustomizablePlayerControls NO
+
 //Show/Hide titles on thumbnails for playlist views on iPhone
 #define kHidePlaylistTitles NO
 #define kAppAppleTVLayoutShowThumbanailTitle NO

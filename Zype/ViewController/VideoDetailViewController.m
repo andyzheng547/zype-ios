@@ -292,19 +292,25 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
             [self.video.subscription_required intValue] == 1 &&
             [ACStatusManager isUserSignedIn] == true &&
             [[NSUserDefaults standardUserDefaults] valueForKey:kOAuthProperty_Subscription] <= 0){
+
+            if (kCustomizablePlayerControls){
+                [self.playerControlsView setAsPause];
+                [self.playerControlsView showSelf];
+            }
             
-            [self.playerControlsView setAsPause];
             self.isPlayerRequestPending = NO;
-            [self.playerControlsView showSelf];
             
             // Sub required but not logged in
         } else if ([self.video.subscription_required intValue] == 1 &&
                    [ACStatusManager isUserSignedIn] == false){
             
-            [self.playerControlsView setAsPause];
-            self.isPlayerRequestPending = NO;
-            [self.playerControlsView showSelf];
+            if (kCustomizablePlayerControls){
+                [self.playerControlsView setAsPause];
+                [self.playerControlsView showSelf];
+            }
             
+            self.isPlayerRequestPending = NO;
+
         } else {
             self.isPlayerRequestPending = NO;
             self.avPlayer = nil;
@@ -386,52 +392,57 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
 }
 
 - (void)setupPlayerControlsListeners {
-    UITapGestureRecognizer *viewPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                            action:@selector(viewPressed:)];
-    [self.playerControlsView.view addGestureRecognizer:viewPressed];
+    if (kCustomizablePlayerControls){
+        UITapGestureRecognizer *viewPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                action:@selector(viewPressed:)];
+        [self.playerControlsView.view addGestureRecognizer:viewPressed];
     
     
-    UITapGestureRecognizer *playPausePressed = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                action:@selector(playPausePressed:)];
-    [self.playerControlsView.playPauseIcon addGestureRecognizer:playPausePressed];
+        UITapGestureRecognizer *playPausePressed = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                    action:@selector(playPausePressed:)];
+        [self.playerControlsView.playPauseIcon addGestureRecognizer:playPausePressed];
     
     
-    UITapGestureRecognizer *backIconPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                action:@selector(backIconPressed:)];
-    [self.playerControlsView.backIcon addGestureRecognizer:backIconPressed];
+        UITapGestureRecognizer *backIconPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                    action:@selector(backIconPressed:)];
+        [self.playerControlsView.backIcon addGestureRecognizer:backIconPressed];
     
     
-    UITapGestureRecognizer *nextIconPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                action:@selector(nextIconPressed:)];
-    [self.playerControlsView.nextIcon addGestureRecognizer:nextIconPressed];
+        UITapGestureRecognizer *nextIconPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                    action:@selector(nextIconPressed:)];
+        [self.playerControlsView.nextIcon addGestureRecognizer:nextIconPressed];
     
     
-    UITapGestureRecognizer *fullScreenPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                      action:@selector(fullScreenPressed:)];
-    [self.playerControlsView.fullScreenIcon addGestureRecognizer:fullScreenPressed];
+        UITapGestureRecognizer *fullScreenPressed = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                          action:@selector(fullScreenPressed:)];
+        [self.playerControlsView.fullScreenIcon addGestureRecognizer:fullScreenPressed];
     
     
-    [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarValueChanged:) forControlEvents:UIControlEventValueChanged];
-    [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarTouchUpInside:) forControlEvents:UIControlEventTouchUpInside];
+        [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarValueChanged:) forControlEvents:UIControlEventValueChanged];
+        [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarTouchUpInside:) forControlEvents:UIControlEventTouchUpInside];
     
-    [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarTouchUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
+        [self.playerControlsView.progressBar addTarget:self action:@selector(progressBarTouchUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
     
-    CMTime interval = CMTimeMakeWithSeconds(0.5, NSEC_PER_SEC);
-    __weak typeof(self) weakSelf = self;
-    self.playbackObserver = [self.avPlayer addPeriodicTimeObserverForInterval:interval
-                                              queue:NULL usingBlock:^(CMTime time) {
-                                                  [weakSelf.playerControlsView updateCurrentTime:[NSNumber numberWithDouble:CMTimeGetSeconds(time)]];
-                                              }];
+        CMTime interval = CMTimeMakeWithSeconds(0.5, NSEC_PER_SEC);
+        __weak typeof(self) weakSelf = self;
+        self.playbackObserver = [self.avPlayer addPeriodicTimeObserverForInterval:interval
+                                                  queue:NULL usingBlock:^(CMTime time) {
+                                                      [weakSelf.playerControlsView updateCurrentTime:[NSNumber numberWithDouble:CMTimeGetSeconds(time)]];
+                                                  }];
+    }
+    
 }
 
 - (void)configurePlayerControlsState {
-    BOOL enableNav;
-    if ([self.videos count] > 1) {
-        enableNav = YES;
-    } else {
-        enableNav = NO;
+    if (kCustomizablePlayerControls){
+        BOOL enableNav;
+        if ([self.videos count] > 1) {
+            enableNav = YES;
+        } else {
+            enableNav = NO;
+        }
+        [self.playerControlsView updateState:NO withCurrentTime:self.video.playTime withDuration:self.video.duration enableUserNavigation:enableNav];
     }
-    [self.playerControlsView updateState:NO withCurrentTime:self.video.playTime withDuration:self.video.duration enableUserNavigation:enableNav];
 }
 
 - (void)configureColors{
@@ -483,7 +494,7 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         
     }
     
-    if (self.playerControlsView){
+    if (kCustomizablePlayerControls && self.playerControlsView){
         [self configurePlayerControlsState];
     }
     
@@ -800,19 +811,23 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         [self.avPlayerController didMoveToParentViewController:self];
         self.avPlayerController.view.translatesAutoresizingMaskIntoConstraints = NO;
         
-        // use custom controls
-        self.avPlayerController.showsPlaybackControls = NO;
+        if (kCustomizablePlayerControls){
+            // use custom controls
+            self.avPlayerController.showsPlaybackControls = NO;
+        }
     }
     
-    if (self.playerControlsView == nil) {
-        self.playerControlsView = [[PlayerControlsOverlay alloc] initWithFrame:self.imageThumbnail.bounds];
-        self.playerControlsView.view.translatesAutoresizingMaskIntoConstraints = NO;
-        [self.view addSubview:self.playerControlsView.view];
-        
-        [self configurePlayerControlsState];
-        [self setupPlayerControlsListeners];
-    } else {
-        [self configurePlayerControlsState];
+    if (kCustomizablePlayerControls){
+        if (self.playerControlsView == nil) {
+            self.playerControlsView = [[PlayerControlsOverlay alloc] initWithFrame:self.imageThumbnail.bounds];
+            self.playerControlsView.view.translatesAutoresizingMaskIntoConstraints = NO;
+            [self.view addSubview:self.playerControlsView.view];
+            
+            [self configurePlayerControlsState];
+            [self setupPlayerControlsListeners];
+        } else {
+            [self configurePlayerControlsState];
+        }
     }
 
     //setup analytics for a player
@@ -875,7 +890,10 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     [self.view bringSubviewToFront:self.avPlayerController.view];
     [self.view bringSubviewToFront:self.adsContainerView];
     [self.view bringSubviewToFront:self.activityIndicator];
-    [self.view bringSubviewToFront:self.playerControlsView.view];
+    
+    if (kCustomizablePlayerControls){
+        [self.view bringSubviewToFront:self.playerControlsView.view];
+    }
 }
 
 - (void)setupVideoPlayerView {
@@ -907,7 +925,12 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     if (![self.imageThumbnail isHidden]) return;
     self.adsContainerView.translatesAutoresizingMaskIntoConstraints = NO;
     
-    UIView* constraintItemView = self.view;
+    UIView* constraintItemView;
+    if (kCustomizablePlayerControls){
+        constraintItemView = self.view;
+    } else {
+        constraintItemView = self.imageThumbnail;
+    }
     
     CGSize screenSize = UIScreen.mainScreen.bounds.size;
     if (screenSize.width < screenSize.height) {
@@ -917,19 +940,26 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
         [[self navigationController] setNavigationBarHidden:YES animated:YES];
     }
     
-    [self.avPlayerController.view removeFromSuperview];
-    [self.playerControlsView.view removeFromSuperview];
-    [self.adsContainerView removeFromSuperview];
-    
-    [self.view addSubview:self.avPlayerController.view];
-    [self.view addSubview:self.playerControlsView.view];
-    [self.view addSubview:self.adsContainerView];
-    
-    [self.view bringSubviewToFront:self.imageThumbnail];
-    [self.view bringSubviewToFront:self.avPlayerController.view];
-    [self.view bringSubviewToFront:self.adsContainerView];
-    [self.view bringSubviewToFront:self.activityIndicator];
-    [self.view bringSubviewToFront:self.playerControlsView.view];
+    // TODO: figure out if this is needed. was causing player to not respond to touch
+//    [self.avPlayerController.view removeFromSuperview];
+//    if (kCustomizablePlayerControls){
+//        [self.playerControlsView.view removeFromSuperview];
+//    }
+//    [self.adsContainerView removeFromSuperview];
+//
+//    [self.view addSubview:self.avPlayerController.view];
+//    if (kCustomizablePlayerControls){
+//        [self.view addSubview:self.playerControlsView.view];
+//    }
+//    [self.view addSubview:self.adsContainerView];
+//
+//    [self.view bringSubviewToFront:self.imageThumbnail];
+//    [self.view bringSubviewToFront:self.avPlayerController.view];
+//    [self.view bringSubviewToFront:self.adsContainerView];
+//    [self.view bringSubviewToFront:self.activityIndicator];
+//    if (kCustomizablePlayerControls){
+//        [self.view bringSubviewToFront:self.playerControlsView.view];
+//    }
     
     // AVPlayerController
     if (self.avPlayerController.view != nil && constraintItemView != nil) {
@@ -962,35 +992,37 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
                                                              multiplier:1
                                                                constant:0]];
         
-        // Player Controls View
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
-                                                              attribute:NSLayoutAttributeTop
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:constraintItemView
-                                                              attribute:NSLayoutAttributeTop
-                                                             multiplier:1
-                                                               constant:0]];
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
-                                                              attribute:NSLayoutAttributeBottom
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:constraintItemView
-                                                              attribute:NSLayoutAttributeBottom
-                                                             multiplier:1
-                                                               constant:0]];
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
-                                                              attribute:NSLayoutAttributeLeft
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:constraintItemView
-                                                              attribute:NSLayoutAttributeLeft
-                                                             multiplier:1
-                                                               constant:0]];
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
-                                                              attribute:NSLayoutAttributeRight
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:constraintItemView
-                                                              attribute:NSLayoutAttributeRight
-                                                             multiplier:1
-                                                               constant:0]];
+        if (kCustomizablePlayerControls){
+            // Player Controls View
+            [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
+                                                                  attribute:NSLayoutAttributeTop
+                                                                  relatedBy:NSLayoutRelationEqual
+                                                                     toItem:constraintItemView
+                                                                  attribute:NSLayoutAttributeTop
+                                                                 multiplier:1
+                                                                   constant:0]];
+            [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
+                                                                  attribute:NSLayoutAttributeBottom
+                                                                  relatedBy:NSLayoutRelationEqual
+                                                                     toItem:constraintItemView
+                                                                  attribute:NSLayoutAttributeBottom
+                                                                 multiplier:1
+                                                                   constant:0]];
+            [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
+                                                                  attribute:NSLayoutAttributeLeft
+                                                                  relatedBy:NSLayoutRelationEqual
+                                                                     toItem:constraintItemView
+                                                                  attribute:NSLayoutAttributeLeft
+                                                                 multiplier:1
+                                                                   constant:0]];
+            [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playerControlsView.view
+                                                                  attribute:NSLayoutAttributeRight
+                                                                  relatedBy:NSLayoutRelationEqual
+                                                                     toItem:constraintItemView
+                                                                  attribute:NSLayoutAttributeRight
+                                                                 multiplier:1
+                                                                   constant:0]];
+        }
         
         // Ads View
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.adsContainerView
@@ -1131,8 +1163,10 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     } else {
         [self.avPlayer play];
         
-        [self.playerControlsView setAsPlay];
-        [self.playerControlsView showSelf];
+        if (kCustomizablePlayerControls){
+            [self.playerControlsView setAsPlay];
+            [self.playerControlsView showSelf];
+        }
     }
 }
 
@@ -1664,8 +1698,10 @@ static NSString *kOptionTableViewCell = @"OptionTableViewCell";
     if (!isPrerollUsed) {
         [self.avPlayer play];
         
-        [self.playerControlsView setAsPlay];
-        [self.playerControlsView showSelf];
+        if (kCustomizablePlayerControls){
+            [self.playerControlsView setAsPlay];
+            [self.playerControlsView showSelf];
+        }
     }
 
 }
@@ -1787,10 +1823,14 @@ NSString* machineName() {
     NSLog(@"Error loading ads: %@", adErrorData.adError.message);
     [self.adsContainerView setHidden:YES];
     [self.avPlayerController.view setHidden:NO];
-    [self.playerControlsView.view setHidden:NO];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView.view setHidden:NO];
+    }
     [self.avPlayer play];
     [self.playerControlsView setAsPlay];
-    [self.playerControlsView showSelf];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView showSelf];
+    }
 }
 
 #pragma mark AdsManager Delegates
@@ -1827,17 +1867,23 @@ NSString* machineName() {
     NSLog(@"AdsManager error: %@", error.message);
     [self.adsContainerView setHidden:YES];
     [self.avPlayerController.view setHidden:NO];
-    [self.playerControlsView.view setHidden:NO];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView.view setHidden:NO];
+    }
     [self.avPlayer play];
-    [self.playerControlsView setAsPlay];
-    [self.playerControlsView showSelf];
+    if(kCustomizablePlayerControls){
+        [self.playerControlsView setAsPlay];
+        [self.playerControlsView showSelf];
+    }
 }
 
 - (void)adsManagerDidRequestContentPause:(IMAAdsManager *)adsManager {
     // The SDK is going to play ads, so pause the content.
     [self.adsContainerView setHidden:NO];
     [self.avPlayerController.view setHidden:YES];
-    [self.playerControlsView.view setHidden:YES];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView.view setHidden:YES];
+    }
     [self.avPlayer pause];
 }
 
@@ -1845,10 +1891,14 @@ NSString* machineName() {
     // The SDK is done playing ads (at least for now), so resume the content.
     [self.adsContainerView setHidden:YES];
     [self.avPlayerController.view setHidden:NO];
-    [self.playerControlsView.view setHidden:NO];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView.view setHidden:NO];
+    }
     [self.avPlayer play];
-    [self.playerControlsView setAsPlay];
-    [self.playerControlsView showSelf];
+    if (kCustomizablePlayerControls){
+        [self.playerControlsView setAsPlay];
+        [self.playerControlsView showSelf];
+    }
 }
 
 
@@ -1935,7 +1985,9 @@ NSString* machineName() {
         } else if (alertView.tag == 997 && buttonIndex == 0){
             [self configurePlayerControlsState];
             self.isPlayerRequestPending = NO;
-            [self.playerControlsView showSelf];
+            if (kCustomizablePlayerControls){
+                [self.playerControlsView showSelf];
+            }
         }
         
         if (alertView.tag == 996 && buttonIndex == 1){ // clicked nsvod subscribe
@@ -1949,7 +2001,9 @@ NSString* machineName() {
         } else if (alertView.tag == 996 && buttonIndex == 0){
             [self configurePlayerControlsState];
             self.isPlayerRequestPending = NO;
-            [self.playerControlsView showSelf];
+            if (kCustomizablePlayerControls){
+                [self.playerControlsView showSelf];
+            }
         }
         
         if (alertView.tag == 995 && buttonIndex == 1){ // intro view - show signup or login
@@ -1963,7 +2017,9 @@ NSString* machineName() {
         } else if (alertView.tag == 995 && buttonIndex == 0){
             [self configurePlayerControlsState];
             self.isPlayerRequestPending = NO;
-            [self.playerControlsView showSelf];
+            if (kCustomizablePlayerControls){
+                [self.playerControlsView showSelf];
+            }
         }
         
     }
@@ -2253,8 +2309,10 @@ NSString* machineName() {
         Timeline *timeline = [self.arrayTimeline objectAtIndex:indexPath.row];
         [self.player setCurrentPlaybackTime:[UIUtil secondsWithMilliseconds:timeline.start]];
         [self.player play];
-        [self.playerControlsView setAsPlay];
-        [self.playerControlsView showSelf];
+        if (kCustomizablePlayerControls){
+            [self.playerControlsView setAsPlay];
+            [self.playerControlsView showSelf];
+        }
         
         // Update timeline cell
         self.selectedTimeline = (int)indexPath.row;

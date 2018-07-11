@@ -30,6 +30,10 @@
         [self.mpVolumeViewContainer addSubview:volumeView];
     }
     
+    if (!kCustomizablePlayerControls) {
+        self.alpha = 0;
+    }
+    
     return self;
 }
 
@@ -57,6 +61,10 @@
         self.view.frame = self.frame;
         
         [self addSubview:self.view];
+    }
+    
+    if (!kCustomizablePlayerControls) {
+        self.alpha = 0;
     }
     
     return self;
