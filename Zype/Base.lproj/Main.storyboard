@@ -537,11 +537,11 @@
                                     <constraint firstAttribute="trailing" secondItem="4VM-EQ-xja" secondAttribute="trailing" constant="10" id="u0b-Zm-dzQ"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xBW-CC-Lq1">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xBW-CC-Lq1">
+                                <rect key="frame" x="0.0" y="64" width="375" height="350"/>
                                 <subviews>
-                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="tIx-et-XG7">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="tIx-et-XG7">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="350"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     </tableView>
                                 </subviews>
@@ -552,6 +552,18 @@
                                     <constraint firstItem="tIx-et-XG7" firstAttribute="top" secondItem="xBW-CC-Lq1" secondAttribute="top" id="dTd-8M-cCN"/>
                                     <constraint firstAttribute="trailing" secondItem="tIx-et-XG7" secondAttribute="trailing" id="jo8-Qk-5XL"/>
                                 </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pFC-1Q-3n0">
+                                <rect key="frame" x="0.0" y="411" width="375" height="256"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <webView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Pax-eu-KYz">
+                                        <rect key="frame" x="30" y="0.0" width="315" height="256"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </webView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -568,12 +580,13 @@
                     <connections>
                         <outlet property="navigationTitle" destination="Yfx-PI-Kgw" id="Wys-RL-Vxh"/>
                         <outlet property="separateNavigationView" destination="MDG-cg-isc" id="D9C-vq-5Hj"/>
+                        <outlet property="subscriptionDisclaimerWebview" destination="Pax-eu-KYz" id="9vL-qL-0Zq"/>
                         <outlet property="tableView" destination="tIx-et-XG7" id="00s-O2-4yv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JVc-8f-jL3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4738" y="-2607"/>
+            <point key="canvasLocation" x="4736.8000000000002" y="-2607.3463268365817"/>
         </scene>
         <!--Sign In View Controller-->
         <scene sceneID="S6i-Bt-L0i">

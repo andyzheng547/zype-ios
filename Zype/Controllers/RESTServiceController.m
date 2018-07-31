@@ -1412,13 +1412,21 @@
                     
                     NSString *title = [contentDic dictValueForKey:kAppKey_Title];
                     NSString *content = [contentDic dictValueForKey:kAppKey_Description];
+                    
+                    NSString *link = [contentDic dictValueForKey:@"link"];
+                    
                     if (title && content && [title isEqualToString:kSettingKey_Terms]){
                         [[NSUserDefaults standardUserDefaults] setObject:content forKey:kSettingKey_Terms];
                     }
                     else if (title && content && [title isEqualToString:kSettingKey_PrivacyPolicy]){
                         [[NSUserDefaults standardUserDefaults] setObject:content forKey:kSettingKey_PrivacyPolicy];
                     }
-                    
+                    else if (title && link && [title isEqualToString:kPrivacyPolicyUrl]){
+                        [[NSUserDefaults standardUserDefaults] setObject:link forKey:kPrivacyPolicyUrl];
+                    }
+                    else if (title && link && [title isEqualToString:kTermsOfServiceUrl]){
+                        [[NSUserDefaults standardUserDefaults] setObject:link forKey:kTermsOfServiceUrl];
+                    }
                 }
                 
             }
